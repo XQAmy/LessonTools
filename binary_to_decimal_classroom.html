@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary to Decimal Classroom</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- FontAwesome CDN -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS File -->
+    <link rel="stylesheet" href="/LessonTools/styles.css">
+</head>
+<body class="bg-slate-900 text-slate-100 p-3 md:p-6 min-h-screen flex flex-col justify-center items-center">
+
+    <div class="max-w-3xl w-full bg-slate-800/90 backdrop-blur-md rounded-2xl border border-slate-700/60 shadow-2xl overflow-hidden my-4">
+        
+        <!-- Header Banner with Level Indicator -->
+        <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-6 text-center relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
+            
+            <div class="inline-flex items-center gap-2 bg-slate-900/50 backdrop-blur-md px-3 py-1 rounded-full border border-white/20 text-xs font-bold text-yellow-300 mb-2">
+                <i class="fa-solid fa-trophy text-amber-400"></i> <span id="level-badge">Level 1 / 3 (4-Bit Challenge)</span>
+            </div>
+
+            <h1 class="text-2xl md:text-3xl font-extrabold text-white tracking-wide flex items-center justify-center gap-3">
+                <i class="fa-solid fa-graduation-cap text-yellow-300"></i> Binary to Decimal Classroom
+            </h1>
+            <p id="level-subtitle" class="text-indigo-100 text-xs md:text-sm mt-1 font-medium">Start from the rightmost bit (least significant bit) and derive step-by-step!</p>
+        </div>
+
+        <div class="p-4 md:p-6 space-y-6">
+            <div>
+                <div class="flex justify-between text-xs font-semibold text-slate-400 mb-2">
+                    <span id="progress-text">Progress: Step 1 / 4 (Bit 1 from right)</span>
+                    <span id="progress-percent" class="text-indigo-400">25%</span>
+                </div>
+                <div class="w-full bg-slate-700 h-3 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="bg-gradient-to-r from-indigo-500 to-purple-500 h-full w-1/4 transition-all duration-500 rounded-full"></div>
+                </div>
+            </div>
+
+            <div class="bg-slate-900/90 rounded-xl p-4 border border-cyan-500/50 text-center shadow-lg">
+                <span class="text-xs font-bold text-cyan-400 tracking-wider uppercase block mb-1">
+                    <i class="fa-solid fa-microchip me-1"></i> Current Binary Challenge
+                </span>
+                <div class="flex items-center justify-center gap-2">
+                    <span class="text-slate-400 text-2xl font-mono">(</span>
+                    <span id="main-binary-num" class="text-2xl md:text-4xl font-black text-amber-300 font-mono tracking-widest drop-shadow-md">
+                        - - - -
+                    </span>
+                    <span class="text-slate-400 text-2xl font-mono">)<sub>2</sub></span>
+                </div>
+            </div>
+
+            <div>
+                <p class="text-xs uppercase tracking-wider font-bold text-slate-400 text-center mb-3">
+                    <i class="fa-solid fa-layer-group me-1 text-cyan-400"></i> Bit Decomposition Panel (Right ➔ Left)
+                </p>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 md:gap-3" id="bit-cards-container">
+                    <!-- Bit Cards dynamic insertion by JS -->
+                </div>
+            </div>
+
+            <!-- Dynamic Steps Wrapper (New step boxes append sequentially) -->
+            <div id="steps-wrapper" class="space-y-6">
+                <!-- Step boxes injected dynamically here -->
+            </div>
+
+            <div id="summary-card" class="bg-slate-900/60 rounded-xl p-4 border border-slate-700/60 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Calculated values for each bit:</span>
+                    <span id="calculated-list" class="text-sm font-mono text-cyan-300 font-semibold">[Pending...]</span>
+                </div>
+                <button onclick="resetCurrentLevel()" class="w-full md:w-auto bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-bold px-4 py-2 rounded-lg transition flex items-center justify-center gap-2 active:scale-95">
+                    <i class="fa-solid fa-rotate-right"></i> Retry Level
+                </button>
+            </div>
+
+            <div id="final-box" class="hidden bg-gradient-to-r from-emerald-950/80 to-teal-950/80 rounded-xl p-5 border border-emerald-500/40 space-y-4 step-enter">
+                <h3 class="text-lg font-bold text-emerald-300 flex items-center gap-2">
+                    <i class="fa-solid fa-calculator text-yellow-400"></i> All bits calculated! Final Addition Stage:
+                </h3>
+                <p class="text-sm text-slate-200">
+                    Add together all the calculated bit values from above:<br>
+                    👉 <span id="final-equation" class="font-mono text-amber-300 font-bold text-base">0 + 0 + 0 + 0</span> = ?
+                </p>
+                <div class="flex gap-2">
+                    <input type="number" id="input-final" onkeyup="if(event.key==='Enter') checkFinal()" placeholder="Enter final decimal answer" class="w-full bg-slate-900 border border-emerald-600 rounded-lg px-4 py-2.5 text-white font-mono focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                    <button onclick="checkFinal()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-lg transition shadow-lg active:scale-95">Submit Answer</button>
+                </div>
+                <p id="feedback-final" class="text-xs font-medium hidden mt-1"></p>
+            </div>
+
+            <div id="level-success-dialog" class="hidden bg-gradient-to-br from-indigo-900 via-purple-900 to-emerald-900 border-2 border-emerald-400/80 rounded-xl p-6 text-center space-y-4 shadow-2xl step-enter">
+                <div class="text-5xl animate-bounce">🎉</div>
+                <h2 id="level-success-title" class="text-2xl font-black text-white">Awesome! Level Completed!</h2>
+                <p id="level-success-msg" class="text-indigo-200 text-sm">You successfully derived and converted this binary number!</p>
+                <div class="bg-slate-950/60 rounded-lg p-3 inline-block font-mono text-base md:text-lg text-emerald-300 font-bold border border-emerald-500/30">
+                    Binary [ <span id="final-binary-display">0000</span> ] = Decimal [ <span id="final-decimal-display">0</span> ]
+                </div>
+                <div>
+                    <button id="btn-next-level" onclick="nextLevel()" class="bg-gradient-to-r from-amber-500 to-emerald-500 hover:from-amber-400 hover:to-emerald-400 text-slate-950 font-extrabold text-base px-8 py-3 rounded-xl transition transform hover:scale-105 shadow-xl active:scale-95 flex items-center justify-center gap-2 mx-auto">
+                        <span>Proceed to Next Level</span> <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Grand Master Certificates (All 3 levels completed) -->
+            <div id="master-dialog" class="hidden bg-gradient-to-br from-yellow-950 via-purple-950 to-indigo-950 border-2 border-amber-400/90 rounded-2xl p-8 text-center space-y-5 shadow-2xl step-enter">
+                <div class="text-6xl animate-bounce">🏆</div>
+                <h2 class="text-3xl font-black text-amber-300 tracking-wide">Congratulations! Binary Master Challenge Completed!</h2>
+                <p class="text-slate-200 text-sm md:text-base max-w-lg mx-auto">
+                    You successfully completed all 3 binary challenges (4-bit, 5-bit, and 6-bit)! You have mastered binary-to-decimal derivation and powers of 2!
+                </p>
+                <div class="flex justify-center gap-3 text-xs md:text-sm font-bold text-emerald-300">
+                    <span class="bg-emerald-950/80 border border-emerald-500/40 px-3 py-1.5 rounded-lg">✅ Level 1 (4-Bit)</span>
+                    <span class="bg-emerald-950/80 border border-emerald-500/40 px-3 py-1.5 rounded-lg">✅ Level 2 (5-Bit)</span>
+                    <span class="bg-emerald-950/80 border border-emerald-500/40 px-3 py-1.5 rounded-lg">✅ Level 3 (6-Bit)</span>
+                </div>
+                <div class="pt-2">
+                    <button onclick="restartAllGames()" class="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-base px-8 py-3.5 rounded-xl transition transform hover:scale-105 shadow-xl active:scale-95">
+                        <i class="fa-solid fa-rotate-right me-1"></i> Restart All 3 Levels
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let currentLevel = 1; // 1 (4-bit), 2 (5-bit), 3 (6-bit)
+        let bitLength = 4;
+        let binaryStr = "";
+        let currentExponent = 0; // 0 to (bitLength - 1)
+        let calculatedTerms = []; // order: [exp0, exp1, exp2, ...]
+
+        function initQuiz() {
+            if (currentLevel === 1) bitLength = 4;
+            else if (currentLevel === 2) bitLength = 5;
+            else if (currentLevel === 3) bitLength = 6;
+
+            const minVal = Math.pow(2, bitLength - 1);
+            const maxVal = Math.pow(2, bitLength) - 1;
+            const decVal = Math.floor(Math.random() * (maxVal - minVal + 1)) + minVal;
+            
+            binaryStr = decVal.toString(2).padStart(bitLength, '0');
+            currentExponent = 0;
+            calculatedTerms = new Array(bitLength).fill(null);
+
+            document.getElementById("level-badge").innerText = `Level ${currentLevel} / 3 (${bitLength}-Bit Challenge)`;
+            document.getElementById("level-subtitle").innerText = `Challenge ${currentLevel}: Derive ${bitLength}-bit binary conversion starting from the rightmost bit`;
+            document.getElementById("main-binary-num").innerText = binaryStr.split('').join(' ');
+            document.getElementById("steps-wrapper").innerHTML = "";
+
+            document.getElementById("final-box").classList.add("hidden");
+            document.getElementById("level-success-dialog").classList.add("hidden");
+            document.getElementById("master-dialog").classList.add("hidden");
+
+            renderBitCards();
+            updateCalculatedSummary();
+            renderStepBox(0);
+        }
+
+        function renderBitCards() {
+            const container = document.getElementById("bit-cards-container");
+            container.innerHTML = "";
+
+            if (bitLength === 4) {
+                container.className = "grid grid-cols-2 sm:grid-cols-4 gap-2.5 md:gap-3";
+            } else if (bitLength === 5) {
+                container.className = "grid grid-cols-2 sm:grid-cols-5 gap-2 md:gap-2.5";
+            } else {
+                container.className = "grid grid-cols-3 sm:grid-cols-6 gap-2 md:gap-2";
+            }
+
+            for (let idx = 0; idx < bitLength; idx++) {
+                const exp = (bitLength - 1) - idx;
+                const stepNum = exp + 1;
+                const bit = binaryStr[idx];
+                const isActive = (exp === currentExponent && calculatedTerms[exp] === null);
+                const isDone = (calculatedTerms[exp] !== null);
+
+                const card = document.createElement("div");
+                card.className = `bit-card p-2.5 md:p-3 rounded-xl border text-center flex flex-col justify-between transition-all duration-300 ${
+                    isDone
+                        ? "bg-slate-800/80 border-emerald-500/60 text-slate-300"
+                        : isActive 
+                        ? "active bg-indigo-950/90 border-cyan-400 text-cyan-300 font-bold ring-2 ring-cyan-400/80 shadow-lg shadow-cyan-500/30 scale-105" 
+                        : "bg-slate-800/40 border-slate-700/50 text-slate-500"
+                }`;
+
+                let statusBadge = "";
+                if (isDone) {
+                    statusBadge = `<span class="bg-emerald-500/20 text-emerald-400 text-[10px] px-1.5 py-0.5 rounded-full border border-emerald-500/40 font-bold">✅ Bit ${stepNum}</span>`;
+                } else if (isActive) {
+                    statusBadge = `<span class="bg-cyan-500/20 text-cyan-300 text-[10px] px-1.5 py-0.5 rounded-full border border-cyan-400/40 animate-pulse font-bold">🔥 Active</span>`;
+                } else {
+                    statusBadge = `<span class="bg-slate-700/50 text-slate-400 text-[10px] px-1.5 py-0.5 rounded-full font-medium">⏳ Pending</span>`;
+                }
+
+                card.innerHTML = `
+                    <div class="flex justify-center mb-1">
+                        ${statusBadge}
+                    </div>
+                    <span class="text-[10px] md:text-xs font-semibold ${isDone ? 'text-slate-300' : isActive ? 'text-cyan-300' : 'text-slate-400'}">
+                        Bit ${stepNum} from right (2<sup>${exp}</sup>)
+                    </span>
+                    <span class="text-2xl md:text-3xl font-black font-mono my-1 ${isDone ? 'text-emerald-300' : isActive ? 'text-amber-300' : 'text-slate-500'}">
+                        ${bit}
+                    </span>
+                    <span class="text-[10px] md:text-xs font-mono font-bold ${isDone ? 'text-emerald-400' : isActive ? 'text-cyan-400' : 'text-slate-500'}">
+                        ${isDone ? '= ' + calculatedTerms[exp] : isActive ? 'In Progress' : '—'}
+                    </span>
+                `;
+                container.appendChild(card);
+            }
+        }
+
+        function renderStepBox(exp) {
+            const stepNum = exp + 1;
+            const bitIdx = (bitLength - 1) - exp;
+            const bitVal = parseInt(binaryStr[bitIdx], 10) || 0;
+            const powerVal = Math.pow(2, exp);
+
+            const percent = Math.round((stepNum / bitLength) * 100);
+            document.getElementById("progress-bar").style.width = percent + "%";
+            document.getElementById("progress-percent").innerText = percent + "%";
+            document.getElementById("progress-text").innerText = `Progress: Step ${stepNum} / ${bitLength} (Bit ${stepNum} from right)`;
+
+            const wrapper = document.getElementById("steps-wrapper");
+
+            const stepBox = document.createElement("div");
+            stepBox.id = `step-box-${exp}`;
+            stepBox.className = "bg-slate-900/80 rounded-xl p-4 md:p-5 border border-indigo-500/30 glow-effect space-y-4 step-enter";
+
+            stepBox.innerHTML = `
+                <div class="flex items-center gap-3 border-b border-slate-800 pb-3">
+                    <div class="bg-indigo-500/20 text-indigo-400 font-bold px-3 py-1 rounded-lg text-xs md:text-sm border border-indigo-500/30">
+                        📍 Step ${stepNum} (Bit ${stepNum} from right)
+                    </div>
+                    <h2 class="font-bold text-base md:text-lg text-slate-200">
+                        Binary Digit: "<span class="text-cyan-400 text-xl font-mono">${bitVal}</span>"
+                    </h2>
+                </div>
+
+                <div id="sq1-box-${exp}" class="space-y-2">
+                    <label class="block text-xs md:text-sm font-semibold text-slate-300">
+                        ❓ [Question 1] Counting from right to left, what exponent (power of 2) does bit ${stepNum} correspond to?
+                    </label>
+                    <div class="flex gap-2">
+                        <input type="number" id="input-s${exp}-q1" onkeyup="if(event.key==='Enter') checkStepQ1(${exp})" placeholder="Enter exponent (e.g. ${exp})" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono transition text-sm">
+                        <button id="btn-s${exp}-q1" onclick="checkStepQ1(${exp})" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2 rounded-lg transition active:scale-95 shadow-lg text-sm shrink-0">Submit</button>
+                    </div>
+                    <p id="feedback-s${exp}-q1" class="text-xs font-medium hidden mt-1"></p>
+                </div>
+
+                <div id="sq2-box-${exp}" class="space-y-2 hidden">
+                    <label class="block text-xs md:text-sm font-semibold text-slate-300">
+                        ❓ [Question 2] What is 2 raised to the power of <span class="text-amber-400 font-bold">${exp}</span> (2<sup>${exp}</sup>)?
+                    </label>
+                    <div class="flex gap-2">
+                        <input type="number" id="input-s${exp}-q2" onkeyup="if(event.key==='Enter') checkStepQ2(${exp})" placeholder="Enter value" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono transition text-sm">
+                        <button id="btn-s${exp}-q2" onclick="checkStepQ2(${exp})" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2 rounded-lg transition active:scale-95 shadow-lg text-sm shrink-0">Submit</button>
+                    </div>
+                    <p id="feedback-s${exp}-q2" class="text-xs font-medium hidden mt-1"></p>
+                </div>
+
+                <div id="sq3-box-${exp}" class="space-y-2 hidden">
+                    <label class="block text-xs md:text-sm font-semibold text-slate-300">
+                        ❓ [Question 3] Decimal value for this bit: Calculate bit digit <span class="text-cyan-400 font-bold">${bitVal}</span> × power value <span class="text-amber-400 font-bold">${powerVal}</span> = ?
+                    </label>
+                    <div class="flex gap-2">
+                        <input type="number" id="input-s${exp}-q3" onkeyup="if(event.key==='Enter') checkStepQ3(${exp})" placeholder="Enter product" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono transition text-sm">
+                        <button id="btn-s${exp}-q3" onclick="checkStepQ3(${exp})" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2 rounded-lg transition active:scale-95 shadow-lg text-sm shrink-0">Submit</button>
+                    </div>
+                    <p id="feedback-s${exp}-q3" class="text-xs font-medium hidden mt-1"></p>
+                </div>
+            `;
+
+            wrapper.appendChild(stepBox);
+
+            setTimeout(() => {
+                const input1 = document.getElementById(`input-s${exp}-q1`);
+                if (input1) input1.focus();
+                stepBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+
+        function showStepFeedback(id, isSuccess, msg) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.innerText = msg;
+            el.className = `text-xs font-semibold mt-1.5 ${isSuccess ? 'text-emerald-400' : 'text-rose-400'}`;
+            el.classList.remove("hidden");
+        }
+
+        function checkStepQ1(exp) {
+            const inputEl = document.getElementById(`input-s${exp}-q1`);
+            const btnEl = document.getElementById(`btn-s${exp}-q1`);
+            if (!inputEl || inputEl.disabled) return;
+
+            const val = parseInt(inputEl.value, 10);
+            if (isNaN(val)) {
+                showStepFeedback(`feedback-s${exp}-q1`, false, "⚠️ Please enter a number!");
+                return;
+            }
+
+            if (val === exp) {
+                showStepFeedback(`feedback-s${exp}-q1`, true, `✅ Correct! Bit ${exp + 1} from the right corresponds to exponent ${exp} (2^${exp}).`);
+                inputEl.disabled = true;
+                btnEl.disabled = true;
+
+                const sq2Box = document.getElementById(`sq2-box-${exp}`);
+                if (sq2Box) {
+                    sq2Box.classList.remove("hidden");
+                    setTimeout(() => {
+                        const input2 = document.getElementById(`input-s${exp}-q2`);
+                        if (input2) input2.focus();
+                    }, 100);
+                }
+            } else {
+                showStepFeedback(`feedback-s${exp}-q1`, false, `❌ Not quite! Hint: The rightmost bit has an exponent of 0. Moving left, increase by 1 (+1). Try again!`);
+            }
+        }
+
+        function checkStepQ2(exp) {
+            const inputEl = document.getElementById(`input-s${exp}-q2`);
+            const btnEl = document.getElementById(`btn-s${exp}-q2`);
+            if (!inputEl || inputEl.disabled) return;
+
+            const val = parseInt(inputEl.value, 10);
+            const expectedPower = Math.pow(2, exp);
+
+            if (isNaN(val)) {
+                showStepFeedback(`feedback-s${exp}-q2`, false, "⚠️ Please enter a number!");
+                return;
+            }
+
+            if (val === expectedPower) {
+                showStepFeedback(`feedback-s${exp}-q2`, true, `✅ Correct! 2^${exp} = ${expectedPower}.`);
+                inputEl.disabled = true;
+                btnEl.disabled = true;
+
+                const sq3Box = document.getElementById(`sq3-box-${exp}`);
+                if (sq3Box) {
+                    sq3Box.classList.remove("hidden");
+                    setTimeout(() => {
+                        const input3 = document.getElementById(`input-s${exp}-q3`);
+                        if (input3) input3.focus();
+                    }, 100);
+                }
+            } else {
+                showStepFeedback(`feedback-s${exp}-q2`, false, `❌ Incorrect! Hint: 2⁰ = 1. Each time the exponent increases by 1, multiply by 2 again. Try again!`);
+            }
+        }
+
+        function checkStepQ3(exp) {
+            const inputEl = document.getElementById(`input-s${exp}-q3`);
+            const btnEl = document.getElementById(`btn-s${exp}-q3`);
+            if (!inputEl || inputEl.disabled) return;
+
+            const val = parseInt(inputEl.value, 10);
+            const bitIdx = (bitLength - 1) - exp;
+            const bitVal = parseInt(binaryStr[bitIdx], 10) || 0;
+            const powerVal = Math.pow(2, exp);
+            const expectedTerm = bitVal * powerVal;
+
+            if (isNaN(val)) {
+                showStepFeedback(`feedback-s${exp}-q3`, false, "⚠️ Please enter a number!");
+                return;
+            }
+
+            if (val === expectedTerm) {
+                showStepFeedback(`feedback-s${exp}-q3`, true, `✅ Perfect! The decimal value for this bit is ${expectedTerm}.`);
+                inputEl.disabled = true;
+                btnEl.disabled = true;
+
+                calculatedTerms[exp] = expectedTerm;
+                renderBitCards();
+                updateCalculatedSummary();
+
+                if (exp < bitLength - 1) {
+                    currentExponent = exp + 1;
+                    setTimeout(() => {
+                        renderStepBox(currentExponent);
+                    }, 400);
+                } else {
+                    setTimeout(() => {
+                        showFinalStep();
+                    }, 400);
+                }
+            } else {
+                showStepFeedback(`feedback-s${exp}-q3`, false, `❌ Multiplication error! Hint: 0 times anything is 0; 1 times anything stays the same. Try again!`);
+            }
+        }
+
+        function updateCalculatedSummary() {
+            const summaryTerms = [];
+            for (let i = 0; i < bitLength; i++) {
+                summaryTerms.push(`Bit ${i+1}: ${calculatedTerms[i] ?? '?'}`);
+            }
+            document.getElementById("calculated-list").innerText = `[ ${summaryTerms.join(', ')} ]`;
+        }
+
+        function showFinalStep() {
+            const finalBox = document.getElementById("final-box");
+            finalBox.classList.remove("hidden");
+
+            const termsReversed = [...calculatedTerms].reverse();
+            document.getElementById("final-equation").innerText = termsReversed.join(" + ");
+
+            setTimeout(() => {
+                const inputFinal = document.getElementById("input-final");
+                if (inputFinal) {
+                    inputFinal.value = "";
+                    inputFinal.focus();
+                }
+                finalBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+
+        function checkFinal() {
+            const inputEl = document.getElementById("input-final");
+            const val = parseInt(inputEl.value, 10);
+            const expectedTotal = calculatedTerms.reduce((a, b) => (a || 0) + (b || 0), 0);
+
+            if (isNaN(val)) {
+                showStepFeedback("feedback-final", false, "⚠️ Please enter a number!");
+                return;
+            }
+
+            if (val === expectedTotal) {
+                document.getElementById("final-box").classList.add("hidden");
+                
+                if (currentLevel < 3) {
+                    document.getElementById("final-binary-display").innerText = binaryStr;
+                    document.getElementById("final-decimal-display").innerText = expectedTotal;
+                    document.getElementById("level-success-title").innerText = `🎉 Awesome! Level ${currentLevel} Complete!`;
+                    document.getElementById("level-success-msg").innerText = `You successfully solved Challenge ${currentLevel} (${bitLength}-Bit binary conversion)!`;
+                    
+                    const btnNext = document.getElementById("btn-next-level");
+                    btnNext.innerHTML = `<span>Proceed to Challenge ${currentLevel + 1} (${currentLevel + 1 === 2 ? 5 : 6}-Bit)</span> <i class="fa-solid fa-arrow-right"></i>`;
+
+                    const levelDialog = document.getElementById("level-success-dialog");
+                    levelDialog.classList.remove("hidden");
+                    levelDialog.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+                    confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+                } else {
+                    const masterDialog = document.getElementById("master-dialog");
+                    masterDialog.classList.remove("hidden");
+                    masterDialog.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+                    confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
+                }
+            } else {
+                showStepFeedback("feedback-final", false, `❌ Addition incorrect! Please sum all the numbers listed above.`);
+            }
+        }
+
+        function nextLevel() {
+            if (currentLevel < 3) {
+                currentLevel++;
+                initQuiz();
+            }
+        }
+
+        function resetCurrentLevel() {
+            initQuiz();
+        }
+
+        function restartAllGames() {
+            currentLevel = 1;
+            initQuiz();
+        }
+
+        window.onload = initQuiz;
+    </script>
+</body>
+</html>
